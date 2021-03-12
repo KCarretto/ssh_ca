@@ -29,7 +29,6 @@ func usage(errmsg string) {
 }
 
 func main() {
-	fmt.Fprintf(os.Stderr, "Lets install a CA!\n")
 	inService, err := svc.IsWindowsService()
 	if err != nil {
 		log.Fatalf("failed to determine if we are running in service: %v", err)

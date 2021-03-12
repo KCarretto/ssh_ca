@@ -15,7 +15,6 @@ import (
 )
 
 var elog debug.Log
-var started bool
 
 func logRequests(fn http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -27,32 +26,26 @@ func logRequests(fn http.Handler) http.HandlerFunc {
 func (m *Service) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
 	const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown | svc.AcceptPauseAndContinue
 	changes <- svc.Status{State: svc.StartPending}
-	fasttick := time.Tick(500 * time.Millisecond)
-	slowtick := time.Tick(2 * time.Second)
-	tick := fasttick
 
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: logRequests(m.HTTP()),
 	}
+
 	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		elog.Info(1, "HTTP Server Listening on :8080")
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			elog.Error(1, fmt.Sprintf("HTTP server failed: %s", err.Error()))
+		}
+	}()
 
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
 loop:
 	for {
 		select {
-		case <-tick:
-			if !started {
-				started = true
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-					if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-						elog.Error(1, fmt.Sprintf("HTTP server failed: %s", err.Error()))
-					}
-				}()
-			}
-
 		case c := <-r:
 			switch c.Cmd {
 			case svc.Interrogate:
@@ -64,11 +57,9 @@ loop:
 				break loop
 			case svc.Pause:
 				changes <- svc.Status{State: svc.Paused, Accepts: cmdsAccepted}
-				tick = slowtick
 				elog.Warning(1, fmt.Sprintf("%s Service Paused (NOTE: This service still functions while paused)", svcName))
 			case svc.Continue:
 				changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
-				tick = fasttick
 				elog.Info(1, fmt.Sprintf("%s Service Resumed", svcName))
 			default:
 				elog.Error(1, fmt.Sprintf("unexpected control request #%d", c))
@@ -102,8 +93,13 @@ func runService(name string, isDebug bool) {
 	caSvc := &Service{
 		Log: func(msg string) { elog.Info(22, msg) },
 	}
-	caSvc.loadKey()
-	caSvc.loadPassword()
+	if err := caSvc.loadKey(); err != nil {
+		elog.Error(1, fmt.Sprintf("[FATAL] Failed to load CA key (consider restoring from a backup or delete the file on disk and restart the service to rotate the CA key): %v", err))
+		panic(err)
+	}
+	if err := caSvc.loadPassword(); err != nil {
+		elog.Error(1, fmt.Sprintf("Failed to load CA service password: %v", err))
+	}
 
 	err = run(name, caSvc)
 	if err != nil {

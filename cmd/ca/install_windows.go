@@ -63,8 +63,6 @@ func installService(name, desc string) error {
 		Description: svcDesc,
 		StartType:   mgr.StartAutomatic,
 	}
-	fmt.Printf("Service config: %+v\n", config)
-
 	s, err = m.CreateService(name, exepath, config, "is", "auto-started")
 	if err != nil {
 		fmt.Printf("Encountered error creating service: %s\n", err.Error())
@@ -72,7 +70,7 @@ func installService(name, desc string) error {
 	}
 	defer s.Close()
 
-	fmt.Printf("Service created! %q\n", name)
+	fmt.Printf("%s Service created!\n", name)
 	err = eventlog.InstallAsEventCreate(name, eventlog.Error|eventlog.Warning|eventlog.Info)
 	if err != nil {
 		s.Delete()
@@ -89,7 +87,7 @@ func removeService(name string) error {
 	defer m.Disconnect()
 	s, err := m.OpenService(name)
 	if err != nil {
-		return fmt.Errorf("service %s is not installed", name)
+		return fmt.Errorf("%s Service is not installed", name)
 	}
 	defer s.Close()
 	err = s.Delete()

@@ -39,7 +39,7 @@ func (svc *Service) HTTP() http.Handler {
 	router.HandleFunc("/ca.pub", svc.HandleCAPublicKey)
 	router.HandleFunc("/request_cert", svc.HandleCertRequest)
 	router.HandleFunc("/change_password", svc.HandlePasswordChange)
-	router.HandleFunc("/rotate_ca_keys", svc.HandleRotateCAKeys)
+	router.HandleFunc("/rotate", svc.HandleRotateCAKeys)
 	return router
 }
 
@@ -50,6 +50,15 @@ func (svc *Service) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 // HandlePasswordChange enables users to post a form in order to change the admin credential.
 func (svc *Service) HandlePasswordChange(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(
+			w,
+			"must be a POST request",
+			http.StatusMethodNotAllowed,
+		)
+		return
+	}
+
 	if err := r.ParseForm(); err != nil {
 		http.Error(
 			w,
@@ -82,6 +91,15 @@ func (svc *Service) HandlePasswordChange(w http.ResponseWriter, r *http.Request)
 // HandleRotateCAKeys changes the keypair used by the CA to sign SSH certificates.
 // The new CA Public Key MUST be deployed to SSH servers for authentication to succeed.
 func (svc *Service) HandleRotateCAKeys(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(
+			w,
+			"must be a POST request",
+			http.StatusMethodNotAllowed,
+		)
+		return
+	}
+
 	if fileExists(PrivateKeyFilePath) {
 		if err := os.Remove(PrivateKeyFilePath); err != nil {
 			http.Error(
@@ -103,6 +121,7 @@ func (svc *Service) HandleRotateCAKeys(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError,
 		)
 	}
+	w.Write([]byte("CA Private & Public Keys successfully rotated\n"))
 }
 
 // HandleCAPublicKey returns the Certificate Authorities current public key.

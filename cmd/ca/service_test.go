@@ -121,7 +121,7 @@ func TestHandleChangePassword(t *testing.T) {
 func TestHandleRotateCAKeys(t *testing.T) {
 	defer os.Remove(PrivateKeyFilePath)
 
-	req, err := http.NewRequest(http.MethodPost, "/rotate_ca_keys", nil)
+	req, err := http.NewRequest(http.MethodPost, "/rotate", nil)
 	require.NoError(t, err)
 
 	b, _ := pem.Decode([]byte(testCAPrivKey))

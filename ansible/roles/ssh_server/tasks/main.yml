@@ -1,0 +1,22 @@
+---
+
+- name: Ensure SSHD is started
+  service:
+    name: 'sshd'
+    state: started
+    enabled: true
+  become: yes
+
+- name: Download SSH-CA Public Key
+  get_url:
+    url: "http://{{ssh_ca}}/ca.pub"
+    dest: "{{sshd_dir}}/{{ssh_ca_pubkey}}"
+    mode: '0644'
+  become: yes
+
+- name: Overwrite sshd_config
+  template:
+    src: sshd_config.j2
+    dest: "{{sshd_dir}}/{{sshd_conf_filename}}"
+  notify: restart sshd
+  become: yes

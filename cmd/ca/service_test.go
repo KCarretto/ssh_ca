@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -61,7 +62,7 @@ func TestHandleCertRequest(t *testing.T) {
 	params.Set("b64pubkey", base64.StdEncoding.EncodeToString([]byte(testUserPubKey)))
 
 	endpoint := "/request_cert?" + params.Encode()
-	// fmt.Printf("HTTP Request: %q", endpoint)
+	fmt.Printf("HTTP Request: %q", endpoint)
 	req, err := http.NewRequest("GET", endpoint, nil)
 	require.NoError(t, err)
 

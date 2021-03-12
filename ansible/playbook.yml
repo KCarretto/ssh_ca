@@ -1,4 +1,8 @@
 ---
+ - hosts: windows
+   roles:
+   - ssh_ca
+
  - hosts: linux
    roles:
    - ssh_server

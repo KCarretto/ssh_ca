@@ -136,6 +136,7 @@ func TestHandleRotateCAKeys(t *testing.T) {
 	rr := httptest.NewRecorder()
 	svc.HTTP().ServeHTTP(rr, req)
 	require.Equal(t, http.StatusOK, rr.Code)
+	require.NotNil(t, svc.Key)
 
 	keyBytes, err := x509.MarshalECPrivateKey(svc.Key)
 	require.NoError(t, err)

@@ -1,0 +1,3 @@
+---
+ssh_ca_bin_dir: 'C:\Program Files (x86)\SSH Certificate Authority'
+ssh_ca_service_name: 'SSH Certificate Authority'

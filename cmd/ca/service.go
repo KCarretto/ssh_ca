@@ -204,6 +204,9 @@ func (svc *Service) HandleCertRequest(w http.ResponseWriter, r *http.Request) {
 	bigSerial, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
 	if err == nil && bigSerial != nil {
 		serial = bigSerial.Uint64()
+		if serial < uint64(1) {
+			serial = uint64(1)
+		}
 	}
 
 	// Create a certificate based on the provided information

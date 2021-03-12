@@ -92,7 +92,7 @@ func TestHandleCertRequest(t *testing.T) {
 
 	require.Len(t, cert.ValidPrincipals, 1)
 	assert.Equal(t, cert.ValidPrincipals[0], "user")
-	assert.Equal(t, cert.Serial, uint64(1))
+	assert.Greater(t, cert.Serial, uint64(0))
 	assert.NotNil(t, cert.Signature)
 	assert.LessOrEqual(t, cert.ValidAfter, uint64(time.Now().Unix()))
 	assert.GreaterOrEqual(t, cert.ValidBefore, uint64(time.Now().Unix()))

@@ -1,0 +1,6 @@
+---
+ssh_ca: '35.188.122.132:8080'
+ssh_ca_pubkey: 'ca.pub'
+
+sshd_dir: '/etc/ssh'
+sshd_conf_filename: 'sshd_config'

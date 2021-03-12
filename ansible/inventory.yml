@@ -1,0 +1,17 @@
+all:
+        children:
+                linux:
+                        vars:
+                                ansible_user: user
+                                ansible_become_pass: user
+                                ansible_connection: ssh
+                        hosts:
+                                192.168.1.231
+                windows:
+                        vars:
+                                ansible_user: user
+                                ansible_password: user
+                                ansible_connection: winrm
+                                ansible_winrm_server_cert_validation: ignore
+                        hosts:
+                                35.188.122.132

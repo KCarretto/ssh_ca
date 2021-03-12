@@ -56,12 +56,23 @@ func installService(name, desc string) error {
 		s.Close()
 		return fmt.Errorf("service %s already exists", name)
 	}
-	fmt.Printf("Creating new service %q\n", name)
-	s, err = m.CreateService(name, exepath, mgr.Config{DisplayName: desc}, "is", "auto-started")
+	fmt.Printf("Creating new service %q (%q)\n", name, exepath)
+
+	config := mgr.Config{
+		DisplayName: svcName,
+		Description: svcDesc,
+		StartType:   mgr.StartAutomatic,
+	}
+	fmt.Printf("Service config: %+v\n", config)
+
+	s, err = m.CreateService(name, exepath, config, "is", "auto-started")
 	if err != nil {
+		fmt.Printf("Encountered error creating service: %s\n", err.Error())
 		return err
 	}
 	defer s.Close()
+
+	fmt.Printf("Service created! %q\n", name)
 	err = eventlog.InstallAsEventCreate(name, eventlog.Error|eventlog.Warning|eventlog.Info)
 	if err != nil {
 		s.Delete()

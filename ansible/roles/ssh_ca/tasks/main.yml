@@ -1,25 +1,30 @@
 ---
+- name: Create SSH Certificate Authority directory
+  win_file:
+    path: "{{ssh_ca_bin_dir}}"
+    state: directory
 
 - name: Copy over ssh_ca binary
   win_copy:
     src: ssh_ca.exe
     dest: "{{ssh_ca_bin_dir}}\\ssh_ca.exe"
 
-#
-# We can't uncomment since there is an error with serivce stopping
-# not the end of the world. Kill the service process manually
-# as a work around.
-#
-# - name: Check if the ssh_ca service is already installed
-#   win_service:
-#       name: "{{ssh_ca_service_name}}"
-#   register: ssh_ca_service
+- name: Check ssh_ca service state
+  win_service:
+    name: "{{ssh_ca_service_name}}"
+  register: ssh_ca_service
 
-# - name: Remove the old ssh_ca service if installed
-#   win_service:
-#     name: "{{ssh_ca_service_name}}"
-#     state: absent
-#   when: ssh_ca_service.exists
+- name: Stop the old ssh_ca service if installed
+  win_service:
+    name: "{{ssh_ca_service_name}}"
+    state: stopped
+  when: ssh_ca_service.exists
+
+- name: Uninstall the old ssh_ca service if installed
+  win_shell: ./ssh_ca.exe remove
+  args:
+    chdir: "{{ssh_ca_bin_dir}}"
+  when: ssh_ca_service.exists
 
 - name: Install the ssh_ca service
   win_shell: ./ssh_ca.exe install

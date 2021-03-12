@@ -17,19 +17,62 @@ import (
 )
 
 // PrivateKeyFilePath is where the CA private key used for signing certificates is stored.
-const PrivateKeyFilePath = "ca.pem"
+// PasswordFilePath is where the admin password for the application is stored.
+// DefaultPassword for the CA admin
+const (
+	PrivateKeyFilePath = "ca.pem"
+	PasswordFilePath   = "admin_password"
+	DefaultPassword    = "changeme"
+)
 
 // Service for issuing SSH certificates.
 type Service struct {
-	Key *ecdsa.PrivateKey
+	Key      *ecdsa.PrivateKey
+	Password string
 }
 
 // HTTP handler for the service.
 func (svc *Service) HTTP() http.Handler {
 	router := http.NewServeMux()
+	router.HandleFunc("/", svc.HandleIndex)
+	router.HandleFunc("/index.html", svc.HandleIndex)
 	router.HandleFunc("/ca.pub", svc.HandleCAPublicKey)
 	router.HandleFunc("/request_cert", svc.HandleCertRequest)
+	router.HandleFunc("/change_password", svc.HandlePasswordChange)
 	return router
+}
+
+func (svc *Service) HandleIndex(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(IndexHTML))
+}
+
+func (svc *Service) HandlePasswordChange(w http.ResponseWriter, r *http.Request) {
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(
+			w,
+			fmt.Sprintf("failed to parse request form: %s", err.Error()),
+			http.StatusBadRequest,
+		)
+		return
+	}
+	password := r.Form.Get("password")
+	if password == "" {
+		http.Error(
+			w,
+			"Cannot provide empty value for 'password'",
+			http.StatusBadRequest,
+		)
+		return
+	}
+	if err := svc.savePassword(password); err != nil {
+		http.Error(
+			w,
+			fmt.Sprintf("failed to save password: %s", err.Error()),
+			http.StatusInternalServerError,
+		)
+		return
+	}
 }
 
 // HandleCAPublicKey returns the Certificate Authorities current public key.
@@ -140,6 +183,33 @@ func (svc *Service) HandleCertRequest(w http.ResponseWriter, r *http.Request) {
 	w.Write(ssh.MarshalAuthorizedKey(cert))
 }
 
+func (svc *Service) savePassword(password string) error {
+	if err := ioutil.WriteFile(PasswordFilePath, []byte(password), 0644); err != nil {
+		return fmt.Errorf("failed to write password to file %q: %w", PasswordFilePath, err)
+	}
+	svc.Password = password
+	return nil
+}
+
+func (svc *Service) loadPassword() error {
+	if !fileExists(PasswordFilePath) {
+		svc.Password = DefaultPassword
+		return svc.savePassword(DefaultPassword)
+	}
+	password, err := ioutil.ReadFile(PasswordFilePath)
+	if err != nil {
+		svc.Password = DefaultPassword
+		return fmt.Errorf("failed to read password file, utilizing default credentials: %w", err)
+	}
+	if string(password) == "" {
+		svc.Password = DefaultPassword
+		return fmt.Errorf("password file contains empty password, utilizing default credentials")
+	}
+
+	svc.Password = string(password)
+	return nil
+}
+
 func (svc *Service) loadKey() error {
 	if !fileExists(PrivateKeyFilePath) {
 		caPriv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -195,6 +265,9 @@ func runApp() {
 	svc := &Service{}
 	if err := svc.loadKey(); err != nil {
 		panic(err)
+	}
+	if err := svc.loadPassword(); err != nil {
+		fmt.Printf("[ERROR] Failed to load password: %v\n", err)
 	}
 
 	fmt.Printf("SSH Certificate Authority listening on :8080\n")

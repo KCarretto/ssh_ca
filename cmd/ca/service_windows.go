@@ -83,6 +83,7 @@ func runService(name string, isDebug bool) {
 
 	caSvc := &Service{}
 	caSvc.loadKey()
+	caSvc.loadPassword()
 
 	err = run(name, caSvc)
 	if err != nil {

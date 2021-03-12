@@ -27,6 +27,7 @@ func (svc *Service) HTTP() http.Handler {
 	router := http.NewServeMux()
 	router.HandleFunc("/", svc.HandleIndex)
 	router.HandleFunc("/index.html", svc.HandleIndex)
+	router.HandleFunc("/about", svc.HandleAbout)
 	router.HandleFunc("/ca.pub", svc.HandleCAPublicKey)
 	router.HandleFunc("/request_cert", svc.requireAuth(svc.HandleCertRequest))
 	router.HandleFunc("/change_password", svc.requireAuth(svc.HandlePasswordChange))
@@ -37,6 +38,11 @@ func (svc *Service) HTTP() http.Handler {
 // HandleIndex serves the index HTML page for the site.
 func (svc *Service) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(IndexHTML))
+}
+
+// HandleAbout serves the about HTML page for the site.
+func (svc *Service) HandleAbout(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(AboutHTML))
 }
 
 // HandlePasswordChange enables users to post a form in order to change the admin credential.

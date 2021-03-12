@@ -4,10 +4,11 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -62,7 +63,7 @@ func TestHandleCertRequest(t *testing.T) {
 	params.Set("b64pubkey", base64.StdEncoding.EncodeToString([]byte(testUserPubKey)))
 
 	endpoint := "/request_cert?" + params.Encode()
-	fmt.Printf("HTTP Request: %q", endpoint)
+	// fmt.Printf("HTTP Request: %q", endpoint)
 	req, err := http.NewRequest("GET", endpoint, nil)
 	require.NoError(t, err)
 
@@ -91,4 +92,27 @@ func TestHandleCertRequest(t *testing.T) {
 	assert.NotNil(t, cert.Signature)
 	assert.LessOrEqual(t, cert.ValidAfter, uint64(time.Now().Unix()))
 	assert.GreaterOrEqual(t, cert.ValidBefore, uint64(time.Now().Unix()))
+}
+
+// TestHandleChangePassword ensures the CA properly changes its password.
+func TestHandleChangePassword(t *testing.T) {
+	expectedPassword := "changed!"
+	params := &url.Values{}
+	params.Set("password", expectedPassword)
+
+	req, err := http.NewRequest(http.MethodPost, "/change_password", strings.NewReader(params.Encode()))
+	require.NoError(t, err)
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	svc := &Service{}
+
+	svc.loadPassword()
+	require.Equal(t, DefaultPassword, svc.Password, "password mismatch")
+
+	rr := httptest.NewRecorder()
+	svc.HTTP().ServeHTTP(rr, req)
+	defer os.Remove(PasswordFilePath)
+
+	require.Equal(t, http.StatusOK, rr.Code)
+	require.Equal(t, expectedPassword, svc.Password)
 }

@@ -47,7 +47,6 @@ func (svc *Service) HandleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 func (svc *Service) HandlePasswordChange(w http.ResponseWriter, r *http.Request) {
-
 	if err := r.ParseForm(); err != nil {
 		http.Error(
 			w,
@@ -73,6 +72,8 @@ func (svc *Service) HandlePasswordChange(w http.ResponseWriter, r *http.Request)
 		)
 		return
 	}
+
+	w.Write([]byte("Password changed successfully\n"))
 }
 
 // HandleCAPublicKey returns the Certificate Authorities current public key.

@@ -1,4 +1,4 @@
 ---
- - hosts: all
+ - hosts: linux
    roles:
    - ssh_server

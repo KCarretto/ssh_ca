@@ -3,9 +3,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/sys/windows/svc"
@@ -22,6 +24,12 @@ func (m *Service) Execute(args []string, r <-chan svc.ChangeRequest, changes cha
 	fasttick := time.Tick(500 * time.Millisecond)
 	slowtick := time.Tick(2 * time.Second)
 	tick := fasttick
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: m.HTTP(),
+	}
+	var wg sync.WaitGroup
+
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
 loop:
 	for {
@@ -29,10 +37,13 @@ loop:
 		case <-tick:
 			if !started {
 				started = true
-				router := m.HTTP()
-				if err := http.ListenAndServe(":8080", router); err != nil {
-					elog.Error(1, fmt.Sprintf("HTTP server failed: %s", err.Error()))
-				}
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					if err := server.ListenAndServe(); err != nil {
+						elog.Error(1, fmt.Sprintf("HTTP server failed: %s", err.Error()))
+					}
+				}()
 			}
 
 		case c := <-r:
@@ -60,6 +71,8 @@ loop:
 		}
 	}
 	changes <- svc.Status{State: svc.StopPending}
+	server.Shutdown(context.Background())
+	wg.Wait()
 	return
 }
 

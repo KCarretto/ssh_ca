@@ -18,10 +18,12 @@ import (
 
 // PrivateKeyFilePath is where the CA private key used for signing certificates is stored.
 // PasswordFilePath is where the admin password for the application is stored.
+// DefaultUser name for the CA admin
 // DefaultPassword for the CA admin
 const (
 	PrivateKeyFilePath = "ca.pem"
 	PasswordFilePath   = "admin_password"
+	DefaultUser        = "admin"
 	DefaultPassword    = "changeme"
 )
 
@@ -37,9 +39,9 @@ func (svc *Service) HTTP() http.Handler {
 	router.HandleFunc("/", svc.HandleIndex)
 	router.HandleFunc("/index.html", svc.HandleIndex)
 	router.HandleFunc("/ca.pub", svc.HandleCAPublicKey)
-	router.HandleFunc("/request_cert", svc.HandleCertRequest)
-	router.HandleFunc("/change_password", svc.HandlePasswordChange)
-	router.HandleFunc("/rotate", svc.HandleRotateCAKeys)
+	router.HandleFunc("/request_cert", svc.requireAuth(svc.HandleCertRequest))
+	router.HandleFunc("/change_password", svc.requireAuth(svc.HandlePasswordChange))
+	router.HandleFunc("/rotate", svc.requireAuth(svc.HandleRotateCAKeys))
 	return router
 }
 
@@ -316,6 +318,18 @@ func fileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+func (svc *Service) requireAuth(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, pass, _ := r.BasicAuth()
+		if user != DefaultUser || pass != svc.Password {
+			w.Header().Add("WWW-Authenticate", "Basic")
+			http.Error(w, "Unauthorized.", 401)
+			return
+		}
+		fn(w, r)
+	}
 }
 
 func runApp() {

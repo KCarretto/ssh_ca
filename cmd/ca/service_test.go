@@ -39,6 +39,7 @@ ewblr1qz4B8MXcmBXI6Yo5lfCLw0Iy+9pA==
 func TestHandleCAPublicKey(t *testing.T) {
 	req, err := http.NewRequest("GET", "/ca.pub", nil)
 	require.NoError(t, err)
+	req.SetBasicAuth(DefaultUser, DefaultPassword)
 
 	b, _ := pem.Decode([]byte(testCAPrivKey))
 
@@ -46,7 +47,8 @@ func TestHandleCAPublicKey(t *testing.T) {
 	require.NoError(t, err)
 
 	svc := &Service{
-		Key: caPriv,
+		Key:      caPriv,
+		Password: DefaultPassword,
 	}
 
 	rr := httptest.NewRecorder()
@@ -66,6 +68,7 @@ func TestHandleCertRequest(t *testing.T) {
 	// fmt.Printf("HTTP Request: %q", endpoint)
 	req, err := http.NewRequest("GET", endpoint, nil)
 	require.NoError(t, err)
+	req.SetBasicAuth(DefaultUser, DefaultPassword)
 
 	b, _ := pem.Decode([]byte(testCAPrivKey))
 
@@ -73,7 +76,8 @@ func TestHandleCertRequest(t *testing.T) {
 	require.NoError(t, err)
 
 	svc := &Service{
-		Key: caPriv,
+		Key:      caPriv,
+		Password: DefaultPassword,
 	}
 
 	rr := httptest.NewRecorder()
@@ -103,8 +107,11 @@ func TestHandleChangePassword(t *testing.T) {
 	req, err := http.NewRequest(http.MethodPost, "/change_password", strings.NewReader(params.Encode()))
 	require.NoError(t, err)
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.SetBasicAuth(DefaultUser, DefaultPassword)
 
-	svc := &Service{}
+	svc := &Service{
+		Password: DefaultPassword,
+	}
 
 	svc.loadPassword()
 	require.Equal(t, DefaultPassword, svc.Password, "password mismatch")
@@ -123,14 +130,15 @@ func TestHandleRotateCAKeys(t *testing.T) {
 
 	req, err := http.NewRequest(http.MethodPost, "/rotate", nil)
 	require.NoError(t, err)
-
+	req.SetBasicAuth(DefaultUser, DefaultPassword)
 	b, _ := pem.Decode([]byte(testCAPrivKey))
 
 	caPriv, err := x509.ParseECPrivateKey(b.Bytes)
 	require.NoError(t, err)
 
 	svc := &Service{
-		Key: caPriv,
+		Key:      caPriv,
+		Password: DefaultPassword,
 	}
 
 	rr := httptest.NewRecorder()

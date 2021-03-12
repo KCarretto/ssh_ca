@@ -9,8 +9,8 @@ all:
                                 192.168.1.231
                 windows:
                         vars:
-                                ansible_user: user
-                                ansible_password: user
+                                ansible_user: kcarretto
+                                ansible_password: zrAwSz;Zq-b>No)
                                 ansible_connection: winrm
                                 ansible_winrm_server_cert_validation: ignore
                         hosts:

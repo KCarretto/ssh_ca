@@ -189,7 +189,7 @@ func (svc *Service) HandleCertRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(
 			w,
 			fmt.Sprintf(
-				"failed to parse provided SSH public key (must be ECDSA P256): %s",
+				"failed to parse provided SSH public key (must be ECDSA P256): %s, Ensure you've provided a valid PUBLIC KEY",
 				err.Error(),
 			),
 			http.StatusBadRequest,

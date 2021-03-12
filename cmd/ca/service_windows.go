@@ -18,7 +18,10 @@ var elog debug.Log
 
 func logRequests(fn http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		elog.Info(80, fmt.Sprintf("[HTTP] %s from %s", r.RequestURI, r.RemoteAddr))
+		elog.Info(
+			LogEventHTTPRequest,
+			fmt.Sprintf("[HTTP] %s from %s", r.RequestURI, r.RemoteAddr),
+		)
 		fn.ServeHTTP(w, r)
 	}
 }
@@ -36,9 +39,9 @@ func (m *Service) Execute(args []string, r <-chan svc.ChangeRequest, changes cha
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		elog.Info(1, "HTTP Server Listening on :8080")
+		elog.Info(LogEventGeneral, "HTTP Server Listening on :8080")
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			elog.Error(1, fmt.Sprintf("HTTP server failed: %s", err.Error()))
+			elog.Error(LogEventGeneral, fmt.Sprintf("HTTP server failed: %s", err.Error()))
 		}
 	}()
 
@@ -57,12 +60,12 @@ loop:
 				break loop
 			case svc.Pause:
 				changes <- svc.Status{State: svc.Paused, Accepts: cmdsAccepted}
-				elog.Warning(1, fmt.Sprintf("%s Service Paused (NOTE: This service still functions while paused)", svcName))
+				elog.Warning(LogEventServiceSignal, fmt.Sprintf("%s Service Paused (NOTE: This service still functions while paused)", svcName))
 			case svc.Continue:
 				changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
-				elog.Info(1, fmt.Sprintf("%s Service Resumed", svcName))
+				elog.Info(LogEventServiceSignal, fmt.Sprintf("%s Service Resumed", svcName))
 			default:
-				elog.Error(1, fmt.Sprintf("unexpected control request #%d", c))
+				elog.Error(LogEventServiceSignal, fmt.Sprintf("unexpected control request #%d", c))
 			}
 		}
 	}
@@ -84,27 +87,27 @@ func runService(name string, isDebug bool) {
 	}
 	defer elog.Close()
 
-	elog.Info(1, fmt.Sprintf("Starting %s Service", name))
+	elog.Info(LogEventServiceSignal, fmt.Sprintf("Starting %s Service", name))
 	run := svc.Run
 	if isDebug {
 		run = debug.Run
 	}
 
 	caSvc := &Service{
-		Log: func(msg string) { elog.Info(22, msg) },
+		Log: func(msg string) { elog.Info(LogEventStateChange, msg) },
 	}
 	if err := caSvc.loadKey(); err != nil {
-		elog.Error(1, fmt.Sprintf("[FATAL] Failed to load CA key (consider restoring from a backup or delete the file on disk and restart the service to rotate the CA key): %v", err))
+		elog.Error(LogEventGeneral, fmt.Sprintf("[FATAL] Failed to load CA key (consider restoring from a backup or delete the file on disk and restart the service to rotate the CA key): %v", err))
 		panic(err)
 	}
 	if err := caSvc.loadPassword(); err != nil {
-		elog.Error(1, fmt.Sprintf("Failed to load CA service password: %v", err))
+		elog.Error(LogEventGeneral, fmt.Sprintf("Failed to load CA service password: %v", err))
 	}
 
 	err = run(name, caSvc)
 	if err != nil {
-		elog.Error(1, fmt.Sprintf("%s Service Failed: %v", name, err))
+		elog.Error(LogEventGeneral, fmt.Sprintf("%s Service Failed: %v", name, err))
 		return
 	}
-	elog.Info(1, fmt.Sprintf("Stopped %s Service", name))
+	elog.Info(LogEventServiceSignal, fmt.Sprintf("Stopped %s Service", name))
 }

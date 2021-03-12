@@ -1,14 +1,4 @@
 ---
-- name: Create SSH Certificate Authority directory
-  win_file:
-    path: "{{ssh_ca_bin_dir}}"
-    state: directory
-
-- name: Copy over ssh_ca binary
-  win_copy:
-    src: ssh_ca.exe
-    dest: "{{ssh_ca_bin_dir}}\\ssh_ca.exe"
-
 - name: Check ssh_ca service state
   win_service:
     name: "{{ssh_ca_service_name}}"
@@ -19,6 +9,16 @@
     name: "{{ssh_ca_service_name}}"
     state: stopped
   when: ssh_ca_service.exists
+
+- name: Create SSH Certificate Authority directory
+  win_file:
+    path: "{{ssh_ca_bin_dir}}"
+    state: directory
+
+- name: Copy over ssh_ca binary
+  win_copy:
+    src: ssh_ca.exe
+    dest: "{{ssh_ca_bin_dir}}\\ssh_ca.exe"
 
 - name: Uninstall the old ssh_ca service if installed
   win_shell: ./ssh_ca.exe remove

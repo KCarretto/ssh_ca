@@ -15,9 +15,6 @@ import (
 	"golang.org/x/sys/windows/svc"
 )
 
-const svcName = "SSH Certificate Authority"
-const svcDesc = "(SCORED SERVICE) Issues SSH Certificates that are used to authenticate to Linux machines. The scoring engine requests SSH certificates via HTTP (port 8080) from this service, and then attempts to SSH to Linux machines in the environment using these certificates."
-
 func usage(errmsg string) {
 	fmt.Fprintf(os.Stderr,
 		"%s\n\n"+

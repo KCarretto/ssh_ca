@@ -9,6 +9,8 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"math"
+	"math/big"
 	"net/http"
 	"os"
 	"time"
@@ -27,7 +29,6 @@ type Service struct {
 func (svc *Service) HTTP() http.Handler {
 	router := http.NewServeMux()
 	router.HandleFunc("/", svc.HandleIndex)
-	router.HandleFunc("/index.html", svc.HandleIndex)
 	router.HandleFunc("/about", svc.HandleAbout)
 	router.HandleFunc("/ca.pub", svc.HandleCAPublicKey)
 	router.HandleFunc("/request_cert", svc.requireAuth(svc.HandleCertRequest))
@@ -119,6 +120,7 @@ func (svc *Service) HandleRotateCAKeys(w http.ResponseWriter, r *http.Request) {
 			fmt.Sprintf("failed to generate new CA private key: %s", err.Error()),
 			http.StatusInternalServerError,
 		)
+		return
 	}
 
 	svc.log(fmt.Sprintf("CA Private & Public keys rotated by %s", r.RemoteAddr))
@@ -198,13 +200,19 @@ func (svc *Service) HandleCertRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var serial uint64 = 1
+	bigSerial, err := rand.Int(rand.Reader, big.NewInt(math.MaxInt64))
+	if err == nil && bigSerial != nil {
+		serial = bigSerial.Uint64()
+	}
+
 	// Create a certificate based on the provided information
 	cert := &ssh.Certificate{
 		CertType:        ssh.UserCert,
 		Key:             sshPub,
-		KeyId:           user,
-		Serial:          1,
-		ValidBefore:     uint64(time.Now().Add(time.Hour * 72).Unix()),
+		KeyId:           fmt.Sprintf("%X", serial),
+		Serial:          serial,
+		ValidBefore:     uint64(time.Now().Add(time.Hour * 24 * 14).Unix()),
 		ValidAfter:      uint64(time.Now().Unix()),
 		ValidPrincipals: []string{user},
 		Permissions: ssh.Permissions{

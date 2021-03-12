@@ -10,3 +10,19 @@ const (
 	DefaultUser        = "admin"
 	DefaultPassword    = "changeme"
 )
+
+const (
+	svcName = "SSH Certificate Authority"
+	svcDesc = "(SCORED SERVICE) Issues SSH Certificates that are used to authenticate to Linux machines. The scoring engine requests SSH certificates via HTTP (port 8080) from this service, and then attempts to SSH to Linux machines in the environment using these certificates."
+)
+
+// LogEventServiceSignal event code for when the service receives a control signal
+// LogEventGeneral event code for general operational information
+// LogEventStateChange event code for when the application state has been changed (e.g. cert issued)
+// LogEventHTTPRequest event code for when the application receives HTTP requests
+const (
+	LogEventServiceSignal = 1
+	LogEventGeneral       = 2
+	LogEventStateChange   = 22
+	LogEventHTTPRequest   = 80
+)

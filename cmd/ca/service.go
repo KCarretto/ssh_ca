@@ -20,6 +20,7 @@ import (
 type Service struct {
 	Key      *ecdsa.PrivateKey
 	Password string
+	Log      func(string)
 }
 
 // HTTP handler for the service.
@@ -82,6 +83,7 @@ func (svc *Service) HandlePasswordChange(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	svc.log(fmt.Sprintf("Service admin password changed by %s", r.RemoteAddr))
 	w.Write([]byte("Password changed successfully\n"))
 }
 
@@ -118,6 +120,8 @@ func (svc *Service) HandleRotateCAKeys(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError,
 		)
 	}
+
+	svc.log(fmt.Sprintf("CA Private & Public keys rotated by %s", r.RemoteAddr))
 	w.Write([]byte("CA Private & Public Keys successfully rotated\n"))
 }
 
@@ -226,7 +230,9 @@ func (svc *Service) HandleCertRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write(ssh.MarshalAuthorizedKey(cert))
+	sshCert := ssh.MarshalAuthorizedKey(cert)
+	svc.log(fmt.Sprintf("Issued new certificate to %s (from %s): %s", user, r.RemoteAddr, string(sshCert)))
+	w.Write(sshCert)
 }
 
 func (svc *Service) savePassword(password string) error {
@@ -324,6 +330,14 @@ func (svc *Service) requireAuth(fn http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		fn(w, r)
+	}
+}
+
+func (svc *Service) log(msg string) {
+	if svc.Log != nil {
+		svc.Log(msg)
+	} else {
+		fmt.Println(msg)
 	}
 }
 

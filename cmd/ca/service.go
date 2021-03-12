@@ -23,6 +23,7 @@ type Service struct {
 	Key      *ecdsa.PrivateKey
 	Password string
 	Log      func(string)
+	Warn     func(string)
 }
 
 // HTTP handler for the service.
@@ -336,6 +337,11 @@ func (svc *Service) requireAuth(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, pass, _ := r.BasicAuth()
 		if user != DefaultUser || pass != svc.Password {
+			svc.warn(fmt.Sprintf(
+				"Request to %s failed, invalid authentication credentials from %s",
+				r.RequestURI,
+				r.RemoteAddr,
+			))
 			w.Header().Add("WWW-Authenticate", "Basic")
 			http.Error(w, "Unauthorized.", 401)
 			return
@@ -347,6 +353,14 @@ func (svc *Service) requireAuth(fn http.HandlerFunc) http.HandlerFunc {
 func (svc *Service) log(msg string) {
 	if svc.Log != nil {
 		svc.Log(msg)
+	} else {
+		fmt.Println(msg)
+	}
+}
+
+func (svc *Service) warn(msg string) {
+	if svc.Warn != nil {
+		svc.Warn(msg)
 	} else {
 		fmt.Println(msg)
 	}

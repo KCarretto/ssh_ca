@@ -94,7 +94,8 @@ func runService(name string, isDebug bool) {
 	}
 
 	caSvc := &Service{
-		Log: func(msg string) { elog.Info(LogEventStateChange, msg) },
+		Log:  func(msg string) { elog.Info(LogEventStateChange, msg) },
+		Warn: func(msg string) { elog.Warning(LogEventGeneral, msg) },
 	}
 	if err := caSvc.loadKey(); err != nil {
 		elog.Error(LogEventGeneral, fmt.Sprintf("[FATAL] Failed to load CA key (consider restoring from a backup or delete the file on disk and restart the service to rotate the CA key): %v", err))

@@ -16,17 +16,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// PrivateKeyFilePath is where the CA private key used for signing certificates is stored.
-// PasswordFilePath is where the admin password for the application is stored.
-// DefaultUser name for the CA admin
-// DefaultPassword for the CA admin
-const (
-	PrivateKeyFilePath = "ca.pem"
-	PasswordFilePath   = "admin_password"
-	DefaultUser        = "admin"
-	DefaultPassword    = "changeme"
-)
-
 // Service for issuing SSH certificates.
 type Service struct {
 	Key      *ecdsa.PrivateKey

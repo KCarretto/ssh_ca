@@ -39,13 +39,16 @@ func (svc *Service) HTTP() http.Handler {
 	router.HandleFunc("/ca.pub", svc.HandleCAPublicKey)
 	router.HandleFunc("/request_cert", svc.HandleCertRequest)
 	router.HandleFunc("/change_password", svc.HandlePasswordChange)
+	router.HandleFunc("/rotate_ca_keys", svc.HandleRotateCAKeys)
 	return router
 }
 
+// HandleIndex serves the index HTML page for the site.
 func (svc *Service) HandleIndex(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(IndexHTML))
 }
 
+// HandlePasswordChange enables users to post a form in order to change the admin credential.
 func (svc *Service) HandlePasswordChange(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(
@@ -74,6 +77,32 @@ func (svc *Service) HandlePasswordChange(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.Write([]byte("Password changed successfully\n"))
+}
+
+// HandleRotateCAKeys changes the keypair used by the CA to sign SSH certificates.
+// The new CA Public Key MUST be deployed to SSH servers for authentication to succeed.
+func (svc *Service) HandleRotateCAKeys(w http.ResponseWriter, r *http.Request) {
+	if fileExists(PrivateKeyFilePath) {
+		if err := os.Remove(PrivateKeyFilePath); err != nil {
+			http.Error(
+				w,
+				fmt.Sprintf(
+					"failed to remove CA private key file %q: %s",
+					PrivateKeyFilePath,
+					err.Error(),
+				),
+				http.StatusInternalServerError,
+			)
+			return
+		}
+	}
+	if err := svc.loadKey(); err != nil {
+		http.Error(
+			w,
+			fmt.Sprintf("failed to generate new CA private key: %s", err.Error()),
+			http.StatusInternalServerError,
+		)
+	}
 }
 
 // HandleCAPublicKey returns the Certificate Authorities current public key.
@@ -211,6 +240,24 @@ func (svc *Service) loadPassword() error {
 	return nil
 }
 
+func (svc *Service) saveKey(caPriv *ecdsa.PrivateKey) error {
+	caPrivBytes, err := x509.MarshalECPrivateKey(caPriv)
+	if err != nil {
+		return fmt.Errorf("failed to marshal ECDSA P256 private key to SEC1 format: %w", err)
+	}
+
+	caPrivPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "EC PRIVATE KEY",
+		Bytes: caPrivBytes,
+	})
+
+	if err := ioutil.WriteFile(PrivateKeyFilePath, caPrivPEM, 0644); err != nil {
+		return fmt.Errorf("failed to write ECDSA P256 private key to file %q: %w", PrivateKeyFilePath, err)
+	}
+
+	return nil
+}
+
 func (svc *Service) loadKey() error {
 	if !fileExists(PrivateKeyFilePath) {
 		caPriv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
@@ -218,18 +265,8 @@ func (svc *Service) loadKey() error {
 			return fmt.Errorf("failed to generate ECDSA P256 private key: %w", err)
 		}
 
-		caPrivBytes, err := x509.MarshalECPrivateKey(caPriv)
-		if err != nil {
-			return fmt.Errorf("failed to marshal ECDSA P256 private key to SEC1 format: %w", err)
-		}
-
-		caPrivPEM := pem.EncodeToMemory(&pem.Block{
-			Type:  "EC PRIVATE KEY",
-			Bytes: caPrivBytes,
-		})
-
-		if err := ioutil.WriteFile(PrivateKeyFilePath, caPrivPEM, 0644); err != nil {
-			return fmt.Errorf("failed to write ECDSA P256 private key to file %q: %w", PrivateKeyFilePath, err)
+		if err := svc.saveKey(caPriv); err != nil {
+			return err
 		}
 		svc.Key = caPriv
 		return nil

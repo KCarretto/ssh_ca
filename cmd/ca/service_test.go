@@ -116,3 +116,35 @@ func TestHandleChangePassword(t *testing.T) {
 	require.Equal(t, http.StatusOK, rr.Code)
 	require.Equal(t, expectedPassword, svc.Password)
 }
+
+// TestHandleRotateCAKeys ensures the CA properly rotates its keypair.
+func TestHandleRotateCAKeys(t *testing.T) {
+	defer os.Remove(PrivateKeyFilePath)
+
+	req, err := http.NewRequest(http.MethodPost, "/rotate_ca_keys", nil)
+	require.NoError(t, err)
+
+	b, _ := pem.Decode([]byte(testCAPrivKey))
+
+	caPriv, err := x509.ParseECPrivateKey(b.Bytes)
+	require.NoError(t, err)
+
+	svc := &Service{
+		Key: caPriv,
+	}
+
+	rr := httptest.NewRecorder()
+	svc.HTTP().ServeHTTP(rr, req)
+	require.Equal(t, http.StatusOK, rr.Code)
+
+	keyBytes, err := x509.MarshalECPrivateKey(svc.Key)
+	require.NoError(t, err)
+
+	require.NotEqual(t,
+		testCAPrivKey,
+		string(pem.EncodeToMemory(&pem.Block{
+			Type:  "EC PRIVATE KEY",
+			Bytes: keyBytes,
+		})),
+	)
+}

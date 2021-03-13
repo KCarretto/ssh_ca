@@ -72,7 +72,7 @@ const AboutHTML = `
 	    <p>Displays information about the service and enables the following actions:
 		<ul>
 		<li>Requesting new SSH User Certificates</li>
-		<li>Rotating the CA's public & private keys</li>
+		<li>Rotating the SSH Certificate Authority's public & private keys</li>
 		<li>Changing the service password</li>
 		</ul>
 		</p>

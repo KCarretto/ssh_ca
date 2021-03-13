@@ -6,6 +6,9 @@ const IndexHTML = `
 <head>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" integrity="sha512-3pIirOrwegjM6erE5gPSwkUzO+3cTjpnV9lexlNZqvupR64iZBnOOTiiLPb9M36zpMScbmUNIcHUqKD47M719g==" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ==" crossorigin="anonymous" />
 </head>
 <body style="background-color:#EEEEEE;">
@@ -39,7 +42,7 @@ const IndexHTML = `
     <div class="ui raised fluid blue card">
       <div class="content">
         <h3 class="header">Request SSH Certificate</h3>
-        <form class="ui form" action="/request_cert">
+        <form class="ui form" action="/request_cert" id="request_cert_form">
           <div class="field">
             <div class="ui labeled input">
               <div class="ui label">
@@ -71,7 +74,7 @@ const IndexHTML = `
       <div class="content">
         <h3 class="header">Rotate Keys</h3>
         <p>Generates a new ECDSA keypair that the SSH Certificate Authority will use to sign new certificates. For authentication to continue working, SSH servers must update their <a href="https://man.openbsd.org/sshd_config#TrustedUserCAKeys" target="_blank">TrustedUserCAKeys</a> to use the new CA public key (which can be found <a href="/ca.pub">here</a>).</p><br/>
-        <form class="ui form" action="/rotate" method="POST">
+        <form class="ui form" action="/rotate" method="POST" id="rotate_form">
           <input class="ui blue floated right button" type="submit" value="Rotate Keys">
         </form>
       </div>
@@ -80,13 +83,20 @@ const IndexHTML = `
     <div class="ui raised fluid blue card">
       <div class="content">
         <h3 class="header">Change Admin Password</h3>
-        <form class="ui form" action="/change_password" method="POST">
+        <form class="ui form" action="/change_password" method="POST" id="change_password">
           <div class="inline field">
             <div class="ui labeled input">
               <div class="ui label">
                 New Password
               </div>
-              <input type="password" id="password" name="password" value="">
+              <input type="password" id="new_password" name="password" value="">
+            </div>
+            <br /><br />
+            <div class="ui labeled input">
+              <div class="ui label">
+                Confirm Password
+              </div>
+              <input type="password" id="confirm_password" name="password" value="">
             </div>
             <input class="ui blue button" type="submit" value="Submit">
           </div>
@@ -98,6 +108,54 @@ const IndexHTML = `
 
 <script>
   $('#keypopup').popup();
+
+  toastr.options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": false,
+    "progressBar": true,
+    "positionClass": "toast-bottom-full-width",
+    "preventDuplicates": false,
+    "onclick": null,
+    "showDuration": "1000",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+  }
+
+  $('#rotate_form').submit(function(event){
+    event.preventDefault();
+    let r = confirm('Are you sure you wish to rotate the CA\'s keys?');
+    if (!r) {
+      return;
+    }
+    $.post('/rotate', function(result, statusText, xhr){
+      if (xhr.status == 200) {
+        toastr["success"](result, "Key Rotation");
+        return;
+      }
+      toastr["error"](result, "Key Rotation");
+    });
+  });
+
+  $('#change_password').submit(function(event){
+    event.preventDefault();
+    if ($('#new_password').serialize() != $('#confirm_password').serialize()) {
+      toastr["error"]("The two entered passwords are not the same", "Password Change");
+      return;
+    }
+    $.post('/change_password', $('#change_password').serialize(), function(result, statusText, xhr){
+      if (xhr.status == 200) {
+        toastr["success"](result, "Password Change");
+        return;
+      }
+      toastr["error"](result, "Password Change");
+    });
+  });
 </script>
 
 </body>

@@ -127,6 +127,19 @@ const IndexHTML = `
     "hideMethod": "fadeOut"
   }
 
+  $('#request_cert_form').submit(function(event){
+    let user = event.currentTarget.elements[0].value;
+    let pubkey = event.currentTarget.elements[1].value;
+    if (user == "") {
+      event.preventDefault();
+      toastr["error"]("Please input a user for the certificate", "Request SSH Certificate");
+    }
+    if (pubkey == "") {
+      event.preventDefault();
+      toastr["error"]("Please input a public key for the certificate", "Request SSH Certificate");
+    }
+  });
+
   $('#rotate_form').submit(function(event){
     event.preventDefault();
     let r = confirm('Are you sure you wish to rotate the CA\'s keys?');
@@ -135,25 +148,25 @@ const IndexHTML = `
     }
     $.post('/rotate', function(result, statusText, xhr){
       if (xhr.status == 200) {
-        toastr["success"](result, "Key Rotation");
+        toastr["success"](result, "Rotation Keys");
         return;
       }
-      toastr["error"](result, "Key Rotation");
+      toastr["error"](result, "Rotation Keys");
     });
   });
 
   $('#change_password').submit(function(event){
     event.preventDefault();
     if ($('#new_password').serialize() != $('#confirm_password').serialize()) {
-      toastr["error"]("The two entered passwords are not the same", "Password Change");
+      toastr["error"]("The two entered passwords are not the same", "Change Admin Password");
       return;
     }
     $.post('/change_password', $('#change_password').serialize(), function(result, statusText, xhr){
       if (xhr.status == 200) {
-        toastr["success"](result, "Password Change");
+        toastr["success"](result, "Change Admin Password");
         return;
       }
-      toastr["error"](result, "Password Change");
+      toastr["error"](result, "Change Admin Password");
     });
   });
 </script>

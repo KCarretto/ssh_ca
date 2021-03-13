@@ -34,7 +34,7 @@ const AboutHTML = `
   </div>
 </div>
 
-<div class="ui raised segment">
+<div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="coffee icon"></i>
 	<div class="content">
@@ -46,7 +46,7 @@ const AboutHTML = `
 </div>
 
 
-<div class="ui raised segment">
+<div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="cloud upload icon"></i>
 	<div class="content">
@@ -115,7 +115,7 @@ const AboutHTML = `
 	</div>
 </div>
 
-<div class="ui raised segment">
+<div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="settings icon"></i>
 	<div class="content">
@@ -142,7 +142,7 @@ const AboutHTML = `
     	  <tr>
       		<td data-label="Name">CA Private Key</td>
       		<td data-label="Location"><code>C:\Program Files (x86)\SSH Certificate Authority\ca.pem</code></td>
-      		<td data-label="Description">ECDSA P256 Private key used by the certificate authority to sign SSH certificates. If it does not exist when the service is started, a new key will be generated and written to this file.</td>
+      		<td data-label="Description">PEM encoded ECDSA P256 Private key used by the certificate authority to sign SSH certificates. If it does not exist when the service is started, a new key will be generated and written to this file.</td>
     	  </tr>
 		  <tr>
       		<td data-label="Name">Admin Password</td>
@@ -163,7 +163,7 @@ const AboutHTML = `
   </div>
 </div>
 
-<div class="ui raised segment">
+<div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="server icon"></i>
 	<div class="content">
@@ -174,7 +174,7 @@ const AboutHTML = `
   <p>SSH Servers will need to have the <a href="https://man.openbsd.org/sshd_config#TrustedUserCAKeys" target="_blank">TrustedUserCAKeys</a> option set in their configuration file in order for the user certificates to be used as an authentication mechanism. This option should point to a local copy of the SSH CA&#39;s public key (which can be found <a href="/ca.pub">here</a>).</p>
 </div>
 
-<div class="ui raised segment">
+<div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="address card icon"></i>
 	<div class="content">
@@ -185,7 +185,7 @@ const AboutHTML = `
   <p>If the service is deployed correctly, then a new form of authentication is available for use when connecting over SSH. Similar to how regular SSH public/private keys operate, you will need to generate a key pair on a client you will wish to connect with. Once you have a key pair you can make a request to the SSH Certificate Authority API at the <code>request_cert</code> endpoint (be sure to choose which user you wish to mint a certificate for carefully!). Then simply place the new user cert with the <code>-cert.pub</code> suffix into the <code>.ssh</code> directory (or wherever your private keys are stored). For example, if the private key file was named <code>id_ecdsa</code> then the SSH certificate would be named <code>id_ecdsa-cert.pub</code>. After that you should be able to SSH directly onto the SSH Server (only for the user you requested the certificate for).</p>
 </div>
 
-<div class="ui raised segment">
+<div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="key icon"></i>
 	<div class="content">

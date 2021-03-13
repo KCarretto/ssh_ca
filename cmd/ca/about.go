@@ -60,7 +60,7 @@ const AboutHTML = `
 
 	  <div class="active title">
 		<i class="dropdown icon"></i>
-		/ <div class="ui label">GET</div><div class="ui blue label">Unauthenticated</div>
+		/ <div class="ui label">GET</div><div class="ui teal label">Unauthenticated</div>
 	  </div>
 	  <div class="active content">
 	    <p>The base endpoint displays general information about the service as well as allowing for a UI for rotating the CA private / public keypair, requesting new SSH certificates, and changing the service password.</p>
@@ -68,7 +68,7 @@ const AboutHTML = `
 
 	  <div class="title">
 		<i class="dropdown icon"></i>
-		/about <div class="ui label">GET</div><div class="ui blue label">Unauthenticated</div>
+		/about <div class="ui label">GET</div><div class="ui teal label">Unauthenticated</div>
 	  </div>
 	  <div class="content">
 	  	<p>This is the about page!</p>
@@ -76,7 +76,7 @@ const AboutHTML = `
 
 	  <div class="title">
 		<i class="dropdown icon"></i>
-		/ca.pub <div class="ui label">GET</div><div class="ui blue label">Unauthenticated</div>
+		/ca.pub <div class="ui label">GET</div><div class="ui teal label">Unauthenticated</div>
 	  </div>
 	  <div class="content">
 	    <p>This endpoint is for retrieving the public key associated with the root key for the service. This is a crucial file necessary to keep synced on all SSH Servers so that User Certificates properly validate. This endpoint is unauthenticated, so systems administrators may <code>curl</code> this endpoint in order to retrieve an updated CA public key.</p>

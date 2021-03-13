@@ -3,40 +3,96 @@ package main
 const IndexHTML = `
 <!DOCTYPE html>
 <html>
-<body>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw==" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ==" crossorigin="anonymous" />
+</head>
+<body style="background-color:#EEEEEE;">
 
-<h1>SSH Certificate Authority</h2>
-<p> Welcome to the SSH Certificate Authority (CA)! This HTTP service is responsible for issuing new SSH certificates to clients that wish to connect to our Linux infrastructure. Our CA Public Key (which can be found <a href="/ca.pub">here</a>) is deployed to all Linux machines in our environment. Any SSH certificate signed by this CA will be able to authenticate to Linux hosts in our environment via SSH.</p>
-<p><a href="/about" target="_blank">Learn More</a></p>
+<div class="ui borderless menu">
+  <div class="item">
+    <h2 class="ui header">
+      <i class="key icon"></i>
+      <div class="content">
+        SSH Certificate Authority
+        <div class="sub header">Providing Secure Authentication</div>
+      </div>
+    </h2>
+  </div>
 
+  <div class="item">
+    <a class="item" href="/">
+      Home
+    </a>
+  </div>
 
-<h2>Tools</h2>
+  <div class="item">
+    <a class="item" href="/about">
+      Documentation
+    </a>
+  </div>
+</div>
 
-<h3>Request SSH Certificate</h3>
-<p>Paste a Base64 Encoded ECDSA P256 Public Key (consider using <code>ssh-keygen -t ecdsa -b 256</code> followed by <code>cat ~/.ssh/id_ecdsa.pub | base64</code>) that can be used for SSH authentication for the provided user. Be sure to provide the public key and <b>not</b> the private key.</p>
-<form action="/request_cert">
-  <label for="user">User</label>
-  <input type="text" id="user" name="user" value="root">
-  <br/>
-  <br/><label for="b64pubkey">Base64 Encoded ECDSA P256 Public Key</label>
-  <br/><textarea id="b64pubkey" name="b64pubkey" rows="6" cols="25"></textarea>
-  <br/>
-  <input type="submit" value="Request">
-</form>
+<div class="ui centered three column grid padded">
+  <div class="ten wide column">
+    <div class="ui raised fluid blue card">
+      <div class="content">
+        <h3 class="header">Request SSH Certificate</h3>
+        <form class="ui form" action="/request_cert">
+          <div class="field">
+            <div class="ui labeled input">
+              <div class="ui label">
+                User
+              </div>
+              <input type="text" id="user" name="user" placeholder="root">
+            </div>
+          </div>
+          <div class="field">
 
-<h3>Rotate Keys</h3>
-<p> This button will generate a new ECDSA keypair that the SSH Certificate Authority will use to sign new certificates. For authentication to continue working, SSH servers must update their <a href="https://man.openbsd.org/sshd_config#TrustedUserCAKeys" target="_blank">TrustedUserCAKeys</a> to use the new CA public key (which can be found <a href="/ca.pub">here</a>).</p>
-<form action="/rotate" method="POST">
-  <input type="submit" value="Rotate Keys">
-</form>
+            <label for="b64pubkey">Base64 Encoded ECDSA P256 Public Key
+            <div class="circular ui icon basic mini button" data-tooltip="consider using <code>ssh-keygen -t ecdsa -b 256</code> followed by <code>cat ~/.ssh/id_ecdsa.pub | base64</code>)">
+              <i class="question icon"></i>
+            </div>
+            </label>
 
-<h3>Change Password</h3>
-<p> Use the below form to change the admin password for this SSH Certificate Authority service.</p>
-<form action="/change_password" method="POST">
-  <label for="password">New Password</label>
-  <input type="password" id="password" name="password" value="">
-  <input type="submit" value="Submit">
-</form>
+            <textarea id="b64pubkey" name="b64pubkey" rows="6" cols="25" placeholder="ZWNkc2Etc2hhMi1uaXN0cDI1NiBBQUFBRTJWalpITmhMWE5vWVRJdGJtbHpkSEF5TlRZQUFBQUlibWx6ZEhBeU5UWUFBQUJCQkRXK004Z0RCK1pYMy9QUHlHR2lOZ0RJdHZ3M080MnZudzQzdGg4emhob0t0V2ZxenF4eThPcmpyY0c0Tld4MFdiRC9iMUQ5MlB6cmVpTWFTdWF4VTI0PSByb290QGxvY2FsaG9zdC5sb2NhbGRvbWFpbgo="></textarea>
+          </div>
+          <input class="ui blue right floated button" type="submit" value="Request">
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="six wide column">
+    <div class="ui raised fluid blue card">
+      <div class="content">
+        <h3 class="header">Rotate Keys</h3>
+        <p>Generates a new ECDSA keypair that the SSH Certificate Authority will use to sign new certificates. For authentication to continue working, SSH servers must update their <a href="https://man.openbsd.org/sshd_config#TrustedUserCAKeys" target="_blank">TrustedUserCAKeys</a> to use the new CA public key (which can be found <a href="/ca.pub">here</a>).</p><br/>
+        <form class="ui form" action="/rotate" method="POST">
+          <input class="ui blue floated right button" type="submit" value="Rotate Keys">
+        </form>
+      </div>
+    </div>
+
+    <div class="ui raised fluid blue card">
+      <div class="content">
+        <h3 class="header">Change Admin Password</h3>
+        <form class="ui form" action="/change_password" method="POST">
+          <div class="inline field">
+            <div class="ui labeled input">
+              <div class="ui label">
+                New Password
+              </div>
+              <input type="password" id="password" name="password" value="">
+            </div>
+            <input class="ui blue button" type="submit" value="Submit">
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

@@ -3,9 +3,49 @@ package main
 const AboutHTML = `
 <!DOCTYPE html>
 <html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js" integrity="sha512-dqw6X88iGgZlTsONxZK9ePmJEFrmHwpuMrsUChjAw1mRUhUITE5QU9pkcSox+ynfLhL15Sv2al5A0LVyDCmtUw==" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" integrity="sha512-8bHTC73gkZ7rZ7vpqUQThUDhqcNFyYi2xgDgPDHc+GXVGHXq+xPjynxIopALmOPqzo9JZj0k6OqqewdGO3EsrQ==" crossorigin="anonymous" />
+</head>
 <body>
 
+<div class="ui borderless menu">
+  <div class="item">
+    <h2 class="ui header">
+      <i class="key icon"></i>
+      <div class="content">
+        SSH Certificate Authority
+        <div class="sub header">Providing Secure Authentication</div>
+      </div>
+    </h2>
+  </div>
+
+  <div class="item">
+    <a class="item" href="/">
+      Home
+    </a>
+  </div>
+
+  <div class="item">
+    <a class="item" href="/about">
+      Documentation
+    </a>
+  </div>
+</div>
+
+
+
 <h1 id="ssh-certificate-authority">SSH Certificate Authority</h1>
+<div class="ui centered grid stretched padded">
+  <div class="ui card fluid">
+    <div class="content">
+      <p> Welcome to the SSH Certificate Authority (CA)! This HTTP service is responsible for issuing new SSH certificates to clients that wish to connect to our Linux infrastructure. Our CA Public Key (which can be found <a href="/ca.pub">here</a>) is deployed to all Linux machines in our environment. Any SSH certificate signed by this CA will be able to authenticate to Linux hosts in our environment via SSH.</p>
+      <p><a href="/about" target="_blank">Learn More</a></p>
+    </div>
+  </div>
+</div>
+
 <p>The goal of this service is to supply a lightweight implementation of a Certificate Authority (CA) for SSH Certificates. This Windows service uses a CA private key which is used to sign given public keys for users. Then any SSH Server with the proper configuration will accept the newly issued SSH certificates for authentication. More information on the implementation of the SSH Certificate Authority &amp; SSH server configuration requirements can be found below.</p>
 <h2 id="api">API</h2>
 <p>The service hosts 5 HTTP endpoints on port <code>8080</code> to allow interaction with it. Some endpoints of the API are secured behind a level of basic authentication(single password).</p>

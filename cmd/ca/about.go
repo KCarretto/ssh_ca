@@ -40,7 +40,7 @@ const AboutHTML = `
 
 
 <div class="ui raised segment">
-  <h2 class="ui dividing icon header">
+  <h2 class="ui dividing icon center aligned header">
 	<i class="cloud upload icon"></i>
 	<div class="content">
 	API
@@ -48,7 +48,7 @@ const AboutHTML = `
 	</div>
   </h2>
 
-  <p>The service hosts 5 HTTP endpoints on port <code>8080</code> to allow interaction with it. Some endpoints of the API are secured behind a level of basic authentication(single password).</p>
+  <p>The service hosts 5 HTTP endpoints on port <code>8080</code> to allow interaction with it. Some endpoints of the API are secured with HTTP basic authentication.</p>
 	<div class="ui styled fluid accordion">
 
 	  <div class="active title">
@@ -101,7 +101,7 @@ const AboutHTML = `
 </div>
 
 <div class="ui raised segment">
-  <h2 class="ui dividing icon header">
+  <h2 class="ui dividing icon center aligned header">
 	<i class="settings icon"></i>
 	<div class="content">
 	Service Configuration
@@ -109,32 +109,42 @@ const AboutHTML = `
 	</div>
   </h2>
   <p>There are basic configuration files that help the SSH CA remain persistent on service/system restart. These files are located in the service&#39;s directory (<code>C:\Program Files (x86)\SSH Certificate Authority</code>). There are two main files: <code>ca.pem</code>(private key) and <code>admin_password</code>(service password). In the event the private key file is missing and the service is restarted, a new public/private key pair will be generated and flushed to disk. If the service password file is missing and the service is restarted, the service will start using the default password.</p>
+  <div class="ui styled accordion">
+    <div class="title">
+	  <i class="dropdown icon"></i>
+		Default Credentials
+	</div>
+	<div class="content">
+		<b>Username:  </b><code>admin</code><br/>
+		<b>Password:  </b><code>changeme</code>
+	</div>
+  </div>
 </div>
 
 <div class="ui raised segment">
-  <h2 class="ui dividing icon header">
-	<i class="settings icon"></i>
+  <h2 class="ui dividing icon center aligned header">
+	<i class="server icon"></i>
 	<div class="content">
 	SSH Server Integration
 	<div class="sub header">Learn how to configure SSH servers to accept SSH Certificates.</div>
 	</div>
   </h2>
-  <p>SSH Servers will need to have the <a href="https://man.openbsd.org/sshd_config#TrustedUserCAKeys" target="_blank">TrustedUserCAKeys</a> option set in their configuration file in order for the user certificates to be used as an authentication mechanism. This option should point to a local copy of the SSH CA&#39;s public key (reachable at the <code>/ca.pub</code> endpoint).</p>
+  <p>SSH Servers will need to have the <a href="https://man.openbsd.org/sshd_config#TrustedUserCAKeys" target="_blank">TrustedUserCAKeys</a> option set in their configuration file in order for the user certificates to be used as an authentication mechanism. This option should point to a local copy of the SSH CA&#39;s public key (which can be found <a href="/ca.pub">here</a>).</p>
 </div>
 
 <div class="ui raised segment">
-  <h2 class="ui dividing icon header">
-	<i class="settings icon"></i>
+  <h2 class="ui dividing icon center aligned header">
+	<i class="address card icon"></i>
 	<div class="content">
 	Using the Certificates
-	<div class="sub header">Learn how to use SSH certificates for authentcation</div>
+	<div class="sub header">Learn how to use SSH certificates for authentication</div>
 	</div>
   </h2>
   <p>If the service is deployed correctly, then a new form of authentication is available for use when connecting over SSH. Similar to how regular SSH public/private keys operate, you will need to generate a key pair on a client you will wish to connect with. Once you have a key pair you can make a request to the SSH Certificate Authority API at the <code>request_cert</code> endpoint (be sure to choose which user you wish to mint a certificate for carefully!). Then simply place the new user cert with the <code>-cert.pub</code> suffix into the <code>.ssh</code> directory (or wherever your private keys are stored). For example, if the private key file was named <code>id_ecdsa</code> then the SSH certificate would be named <code>id_ecdsa-cert.pub</code>. After that you should be able to SSH directly onto the SSH Server (only for the user you requested the certificate for).</p>
 </div>
 
 <div class="ui raised segment">
-  <h2 class="ui dividing icon header">
+  <h2 class="ui dividing icon center aligned header">
 	<i class="key icon"></i>
 	<div class="content">
 	Keys

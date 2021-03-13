@@ -36,7 +36,7 @@ const AboutHTML = `
 
 <div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
-	<i class="coffee icon"></i>
+	<i class="blue coffee icon"></i>
 	<div class="content">
 	Overview
 	<div class="sub header">What is the SSH Certificate Authority?</div>
@@ -48,7 +48,7 @@ const AboutHTML = `
 
 <div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
-	<i class="cloud upload icon"></i>
+	<i class="blue cloud upload icon"></i>
 	<div class="content">
 	API
 	<div class="sub header">Learn about our HTTP API.</div>
@@ -117,7 +117,7 @@ const AboutHTML = `
 
 <div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
-	<i class="settings icon"></i>
+	<i class="blue settings icon"></i>
 	<div class="content">
 	Service Configuration
 	<div class="sub header">Learn how the service operates.</div>
@@ -165,7 +165,7 @@ const AboutHTML = `
 
 <div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
-	<i class="server icon"></i>
+	<i class="blue server icon"></i>
 	<div class="content">
 	SSH Server Integration
 	<div class="sub header">Learn how to configure SSH servers to accept SSH Certificates.</div>
@@ -176,7 +176,7 @@ const AboutHTML = `
 
 <div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
-	<i class="address card icon"></i>
+	<i class="blue address card icon"></i>
 	<div class="content">
 	Using the Certificates
 	<div class="sub header">Learn how to use SSH certificates for authentication</div>
@@ -187,7 +187,7 @@ const AboutHTML = `
 
 <div class="ui raised very padded segment">
   <h2 class="ui dividing icon center aligned header">
-	<i class="key icon"></i>
+	<i class="blue key icon"></i>
 	<div class="content">
 	Keys
 	<div class="sub header">Learn about Key Requirements</div>

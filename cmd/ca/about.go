@@ -35,6 +35,13 @@ const AboutHTML = `
 </div>
 
 <div class="ui raised segment">
+  <h2 class="ui dividing icon center aligned header">
+	<i class="coffee icon"></i>
+	<div class="content">
+	Overview
+	<div class="sub header">What is the SSH Certificate Authority?</div>
+	</div>
+  </h2>
   <p>Welcome to the SSH Certificate Authority (CA)! This HTTP service is responsible for issuing new SSH certificates to clients that wish to connect to our Linux infrastructure. Our CA Public Key (which can be found <a href="/ca.pub">here</a>) is deployed to all Linux machines in our environment. Any SSH certificate signed by this CA will be able to authenticate to Linux hosts in our environment via SSH. More information on the implementation of the SSH Certificate Authority &amp; SSH server configuration requirements can be found below.</p>
 </div>
 
@@ -48,7 +55,7 @@ const AboutHTML = `
 	</div>
   </h2>
 
-  <p>The service hosts 5 HTTP endpoints on port <code>8080</code> to allow interaction with it. Some endpoints of the API are secured with HTTP basic authentication.</p>
+  <p>The service hosts 6 HTTP endpoints on port <code>8080</code> to allow interaction with it. Some endpoints of the API are secured with HTTP basic authentication.</p>
 	<div class="ui styled fluid accordion">
 
 	  <div class="active title">
@@ -57,6 +64,14 @@ const AboutHTML = `
 	  </div>
 	  <div class="active content">
 	    <p>The base endpoint displays general information about the service as well as allowing for a UI for rotating the CA private / public keypair, requesting new SSH certificates, and changing the service password.</p>
+	  </div>
+
+	  <div class="title">
+		<i class="dropdown icon"></i>
+		/about <div class="ui label">GET</div><div class="ui blue label">Unauthenticated</div>
+	  </div>
+	  <div class="content">
+	  	<p>This is the about page!</p>
 	  </div>
 
 	  <div class="title">
@@ -105,11 +120,38 @@ const AboutHTML = `
 	<i class="settings icon"></i>
 	<div class="content">
 	Service Configuration
-	<div class="sub header">Learn about how the service operates.</div>
+	<div class="sub header">Learn how the service operates.</div>
 	</div>
   </h2>
   <p>There are basic configuration files that help the SSH CA remain persistent on service/system restart. These files are located in the service&#39;s directory (<code>C:\Program Files (x86)\SSH Certificate Authority</code>). There are two main files: <code>ca.pem</code>(private key) and <code>admin_password</code>(service password). In the event the private key file is missing and the service is restarted, a new public/private key pair will be generated and flushed to disk. If the service password file is missing and the service is restarted, the service will start using the default password.</p>
-  <div class="ui styled accordion">
+  <div class="ui styled fluid accordion">
+    <div class="title">
+	<i class="dropdown icon"></i>
+		Important Files
+	</div>
+	<div class="content">
+	  <table class="ui celled table">
+  		<thead>
+    	  <tr>
+		    <th>Name</th>
+    	    <th>Location</th>
+    	    <th>Description</th>
+  		  </tr>
+		</thead>
+  		<tbody>
+    	  <tr>
+      		<td data-label="Name">CA Private Key</td>
+      		<td data-label="Location"><code>C:\Program Files (x86)\SSH Certificate Authority\ca.pem</code></td>
+      		<td data-label="Description">ECDSA P256 Private key used by the certificate authority to sign SSH certificates. If it does not exist when the service is started, a new key will be generated and written to this file.</td>
+    	  </tr>
+		  <tr>
+      		<td data-label="Name">Admin Password</td>
+      		<td data-label="Location"><code>C:\Program Files (x86)\SSH Certificate Authority\admin_password</code></td>
+      		<td data-label="Description">Password used for HTTP Basic Authentication to access this web application. If it does not exist when the service is started, the default credentials will be used and written to this file.</td>
+    	  </tr>
+		</tbody>
+	  </table>
+	</div>
     <div class="title">
 	  <i class="dropdown icon"></i>
 		Default Credentials

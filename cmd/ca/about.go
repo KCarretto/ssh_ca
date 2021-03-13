@@ -12,13 +12,15 @@ const AboutHTML = `
 
 <div class="ui borderless menu">
   <div class="item">
+  <a href="/">
     <h2 class="ui header">
-      <i class="key icon"></i>
+      <i class="key blue icon"></i>
       <div class="content">
         SSH Certificate Authority
         <div class="sub header">Providing Secure Authentication</div>
       </div>
     </h2>
+  </a>
   </div>
 
   <div class="item">
@@ -42,11 +44,15 @@ const AboutHTML = `
 	<div class="sub header">What is the SSH Certificate Authority?</div>
 	</div>
   </h2>
-  <p>Welcome to the SSH Certificate Authority (CA)! This HTTP service is responsible for issuing new SSH certificates to clients that wish to connect to our Linux infrastructure. Our CA Public Key (which can be found <a href="/ca.pub">here</a>) is deployed to all Linux machines in our environment. Any SSH certificate signed by this CA will be able to authenticate to Linux hosts in our environment via SSH. More information on the implementation of the SSH Certificate Authority &amp; SSH server configuration requirements can be found below.</p>
+  <p>
+  Welcome to the SSH Certificate Authority!
+  This HTTP service is responsible for issuing new SSH User Certificates to users that wish to connect to our Linux infrastructure.
+  Any SSH User Certificate signed by this SSH Certificate Authority will be able to authenticate to Linux hosts in our environment.
+  More information on the implementation of the SSH Certificate Authority &amp; configuration requirements for SSH Servers can be found below.</p>
 </div>
 
 
-<div class="ui raised very padded segment">
+<div class="ui raised very padded blue segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="blue cloud upload icon"></i>
 	<div class="content">
@@ -55,7 +61,7 @@ const AboutHTML = `
 	</div>
   </h2>
 
-  <p>The service hosts 6 HTTP endpoints on port <code>8080</code> to allow interaction with it. Some endpoints of the API are secured with HTTP basic authentication.</p>
+  <p>The service hosts 6 HTTP endpoints on port <code>8080</code>. Some endpoints of the API are secured with HTTP Basic Authentication.</p>
 	<div class="ui styled fluid accordion">
 
 	  <div class="active title">
@@ -63,7 +69,13 @@ const AboutHTML = `
 		/ <div class="ui label">GET</div><div class="ui teal label">Unauthenticated</div>
 	  </div>
 	  <div class="active content">
-	    <p>The base endpoint displays general information about the service as well as allowing for a UI for rotating the CA private / public keypair, requesting new SSH certificates, and changing the service password.</p>
+	    <p>Displays information about the service and enables the following actions:
+		<ul>
+		<li>Requesting new SSH User Certificates</li>
+		<li>Rotating the CA's public & private keys</li>
+		<li>Changing the service password</li>
+		</ul>
+		</p>
 	  </div>
 
 	  <div class="title">
@@ -71,7 +83,7 @@ const AboutHTML = `
 		/about <div class="ui label">GET</div><div class="ui teal label">Unauthenticated</div>
 	  </div>
 	  <div class="content">
-	  	<p>This is the about page!</p>
+	  	<p>Provides mission critical operational intel on the configuration, behaviour, and cyber effects of the SSH Certificate Authority.</p>
 	  </div>
 
 	  <div class="title">
@@ -79,7 +91,7 @@ const AboutHTML = `
 		/ca.pub <div class="ui label">GET</div><div class="ui teal label">Unauthenticated</div>
 	  </div>
 	  <div class="content">
-	    <p>This endpoint is for retrieving the public key associated with the root key for the service. This is a crucial file necessary to keep synced on all SSH Servers so that User Certificates properly validate. This endpoint is unauthenticated, so systems administrators may <code>curl</code> this endpoint in order to retrieve an updated CA public key.</p>
+	    <p>Used for retrieving the SSH Certificate Authority's public key. This file must be synchronized across all SSH Servers for SSH authentication to properly function. This endpoint is unauthenticated, so system administrators may easily <code>curl</code> this endpoint to retrieve an updated SSH Certificate Authority public key.</p>
 	  </div>
 
 	  <div class="title">
@@ -87,12 +99,23 @@ const AboutHTML = `
 		/request_cert <div class="ui label">GET</div><div class="ui blue label">Authenticated</div><div class="ui green label">Query Param: b64pubkey</div><div class="ui green label">Query Param: user</div>
 	  </div>
 	  <div class="content">
-		<p>This endpoint is used for signing a specific SSH certificate for a specific user. The first query parameter is a base64 encoding of the content of an ECDSA P256 ssh public key file.
-		<br/><br/><br/>As an example, if an ssh public key is:<br/>br/>
-		<code>ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBDW+M8gDB+ZX3/PPyGGiNgDItvw3O42vnw43th8zhhoKtWfqzqxy8OrjrcG4NWx0WbD/b1D92PzreiMaSuaxU24= user@localhost.localdomain</code>
+		<p>Signs an SSH User Certificate for the given user. The first query parameter is a base64 encoded ECDSA P256 SSH public key.
+		<br/><br/><br/>As an example, if an SSH public key is:<br/>
+		<code>
+			ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAA<br/>
+			IbmlzdHAyNTYAAABBBDW+M8gDB+ZX3/PPyGGiNgDItvw3O42vnw43th<br/>
+			8zhhoKtWfqzqxy8OrjrcG4NWx0WbD/b1D92PzreiMaSuaxU24= <br/>
+			user@localhost.localdomain
+		</code>
 		<br/><br/>Then this value should be:<br/>
-		<code>ZWNkc2Etc2hhMi1uaXN0cDI1NiBBQUFBRTJWalpITmhMWE5vWVRJdGJtbHpkSEF5TlRZQUFBQUlibWx6ZEhBeU5UWUFBQUJCQkRXK004Z0RCK1pYMy9QUHlHR2lOZ0RJdHZ3M080MnZudzQzdGg4emhob0t0V2ZxenF4eThPcmpyY0c0Tld4MFdiRC9iMUQ5MlB6cmVpTWFTdWF4VTI0PSByb290QGxvY2FsaG9zdC5sb2NhbGRvbWFpbgo=</code>
-		<br/><br/>The second query param should match the username of the user you wish the certificate being minted to be valid for. As and example, <code>user</code>. The response will be returned as the raw text for the newly minted SSH certificate.
+		<code>
+			ZWNkc2Etc2hhMi1uaXN0cDI1NiBBQUFBRTJWalpITmhMWE5vWVRJdGJ<br/>
+			tbHpkSEF5TlRZQUFBQUlibWx6ZEhBeU5UWUFBQUJCQkRXK004Z0RCK1<br/>
+			pYMy9QUHlHR2lOZ0RJdHZ3M080MnZudzQzdGg4emhob0t0V2ZxenF4e<br/>
+			ThPcmpyY0c0Tld4MFdiRC9iMUQ5MlB6cmVpTWFTdWF4VTI0PSByb290<br/>
+			QGxvY2FsaG9zdC5sb2NhbGRvbWFpbgo=
+		</code>
+		<br/><br/>The second query param is the unixname that the SSH User Certificate will be valid for (e.g. <code>root</code>).
 		</p>
 	  </div>
 
@@ -101,7 +124,7 @@ const AboutHTML = `
 	    /rotate <div class="ui label">POST</div><div class="ui blue label">Authenticated</div>
 	  </div>
 	  <div class="content">
-	    <p>This endpoint is responsible for rotating the SSH CA&#39;s public and private keys in the event of them being compromised/expired. After this is done, be sure to quickly update the corresponding SSH Servers with the new <code>ca.pub</code> so that new SSH certificates don&#39;t fail authentication. After the keys are rotated the new private key is flushed to disk in the service&#39;s directory. </p>
+	    <p>Rotates the SSH Certificate Authority's public and private keys. These keys should be rotated immediately in the event of compromise. To minimize downtime, quickly update the corresponding SSH Servers to use the new <a href="/ca.pub">ca.pub</a> (SSH Authentication will fail until you do so). After the keys have been rotated the new SSH Certificate Authority private key is written to disk in the service&#39;s directory. </p>
 	  </div>
 
 	  <div class="title">
@@ -109,13 +132,13 @@ const AboutHTML = `
 	    /change_password <div class="ui label">POST</div><div class="ui blue label">Authenticated</div><div class="ui green label">Param: password</div>
 	  </div>
 	  <div class="content">
-        <p>This endpoint is used for changing the password of the service’s Web API. This service is strictly single user and as such only has one user/credential pair. The user is statically <code>admin</code>, the password will default to <code>changeme</code>. When this endpoint is hit the new password will also be flushed to disk in the service&#39;s directory.</p>
+        <p>Changes the password of the service’s Web API. This service only has a single user (<code>admin</code>). This endpoint saves the password to disk in the service's directory. </p>
 	  </div>
 
 	</div>
 </div>
 
-<div class="ui raised very padded segment">
+<div class="ui raised very padded blue segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="blue settings icon"></i>
 	<div class="content">
@@ -123,13 +146,13 @@ const AboutHTML = `
 	<div class="sub header">Learn how the service operates.</div>
 	</div>
   </h2>
-  <p>There are basic configuration files that help the SSH CA remain persistent on service/system restart. These files are located in the service&#39;s directory (<code>C:\Program Files (x86)\SSH Certificate Authority</code>). There are two main files: <code>ca.pem</code>(private key) and <code>admin_password</code>(service password). In the event the private key file is missing and the service is restarted, a new public/private key pair will be generated and flushed to disk. If the service password file is missing and the service is restarted, the service will start using the default password.</p>
+  <p>There are basic configuration files that help the SSH Certificate Authority remain persistent on service/system restart.</p>
   <div class="ui styled fluid accordion">
-    <div class="title">
+    <div class="active title">
 	<i class="dropdown icon"></i>
 		Important Files
 	</div>
-	<div class="content">
+	<div class="active content">
 	  <table class="ui celled table">
   		<thead>
     	  <tr>
@@ -140,9 +163,9 @@ const AboutHTML = `
 		</thead>
   		<tbody>
     	  <tr>
-      		<td data-label="Name">CA Private Key</td>
+      		<td data-label="Name">SSH CA Private Key</td>
       		<td data-label="Location"><code>C:\Program Files (x86)\SSH Certificate Authority\ca.pem</code></td>
-      		<td data-label="Description">PEM encoded ECDSA P256 Private key used by the certificate authority to sign SSH certificates. If it does not exist when the service is started, a new key will be generated and written to this file.</td>
+      		<td data-label="Description">PEM encoded ECDSA P256 Private key used by the SSH Certificate Authority to sign SSH User Certificates. If it does not exist when the service is started, a new key will be generated and written to this file.</td>
     	  </tr>
 		  <tr>
       		<td data-label="Name">Admin Password</td>
@@ -151,6 +174,44 @@ const AboutHTML = `
     	  </tr>
 		</tbody>
 	  </table>
+	</div>
+	<div class="title">
+	<i class="dropdown icon"></i>
+		Service Logs
+	</div>
+	<div class="content">
+	This service logs all requests and important state changes to Windows Event Log.
+	<table class="ui celled table">
+		<thead>
+			<tr>
+			<th>Event ID</th>
+			<th>Type</th>
+			<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td data-label="Event ID">1</td>
+			<td data-label="Type">Service Control Signals</td>
+			<td data-label="Description">Control signals received by this service (e.g. <code>start</code> / <code>shutdown</code>).</td>
+		</tr>
+		<tr>
+			<td data-label="Event ID">2</td>
+			<td data-label="Type">General</td>
+			<td data-label="Description">General log messages.</td>
+		</tr>
+		<tr>
+			<td data-label="Event ID">22</td>
+			<td data-label="Type">State Changes</td>
+			<td data-label="Description">Important application state changes (e.g. password change).</td>
+		</tr>
+		<tr>
+			<td data-label="Event ID">80</td>
+			<td data-label="Type">Web Requests</td>
+			<td data-label="Description">HTTP requests handled by the server.</td>
+		</tr>
+	</tbody>
+	</table>
 	</div>
     <div class="title">
 	  <i class="dropdown icon"></i>
@@ -163,29 +224,29 @@ const AboutHTML = `
   </div>
 </div>
 
-<div class="ui raised very padded segment">
+<div class="ui raised very padded blue segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="blue server icon"></i>
 	<div class="content">
 	SSH Server Integration
-	<div class="sub header">Learn how to configure SSH servers to accept SSH Certificates.</div>
+	<div class="sub header">Learn how to configure SSH servers to accept SSH User Certificates.</div>
 	</div>
   </h2>
-  <p>SSH Servers will need to have the <a href="https://man.openbsd.org/sshd_config#TrustedUserCAKeys" target="_blank">TrustedUserCAKeys</a> option set in their configuration file in order for the user certificates to be used as an authentication mechanism. This option should point to a local copy of the SSH CA&#39;s public key (which can be found <a href="/ca.pub">here</a>).</p>
+  <p>SSH Servers will need to have the <a href="https://man.openbsd.org/sshd_config#TrustedUserCAKeys" target="_blank">TrustedUserCAKeys</a> option set in their configuration file in order for the SSH User Certificates to be used as an authentication mechanism. This option should point to a local copy of the SSH Certificate Authority's public key (which can be found <a href="/ca.pub">here</a>).</p>
 </div>
 
-<div class="ui raised very padded segment">
+<div class="ui raised very padded blue segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="blue address card icon"></i>
 	<div class="content">
 	Using the Certificates
-	<div class="sub header">Learn how to use SSH certificates for authentication</div>
+	<div class="sub header">Learn how to use SSH User Certificates for authentication</div>
 	</div>
   </h2>
-  <p>If the service is deployed correctly, then a new form of authentication is available for use when connecting over SSH. Similar to how regular SSH public/private keys operate, you will need to generate a key pair on a client you will wish to connect with. Once you have a key pair you can make a request to the SSH Certificate Authority API at the <code>request_cert</code> endpoint (be sure to choose which user you wish to mint a certificate for carefully!). Then simply place the new user cert with the <code>-cert.pub</code> suffix into the <code>.ssh</code> directory (or wherever your private keys are stored). For example, if the private key file was named <code>id_ecdsa</code> then the SSH certificate would be named <code>id_ecdsa-cert.pub</code>. After that you should be able to SSH directly onto the SSH Server (only for the user you requested the certificate for).</p>
+  <p>If the service is deployed correctly, then a new form of authentication is available for use when connecting over SSH. Similar to how regular SSH public/private keys operate, you will need to generate a key pair on the client you wish to connect with. Once you have a key pair you can make a request to the SSH Certificate Authority API using the <code>request_cert</code> endpoint. Next, place the new SSH User Certificate with a <code>-cert.pub</code> suffix into the <code>.ssh</code> directory (or wherever your private keys are stored). For example, if the private key file was named <code>id_ecdsa</code> then the SSH User Certificate would be named <code>id_ecdsa-cert.pub</code>. After that you should be able to SSH to Linux machines in our environment as the user you requested the SSH User Certificate for.</p>
 </div>
 
-<div class="ui raised very padded segment">
+<div class="ui raised very padded blue segment">
   <h2 class="ui dividing icon center aligned header">
 	<i class="blue key icon"></i>
 	<div class="content">
@@ -193,7 +254,7 @@ const AboutHTML = `
 	<div class="sub header">Learn about Key Requirements</div>
 	</div>
   </h2>
-  <p>This project uses <code>ecdsa-sha2-nistp256</code> keys that can be generated via <code>ssh-keygen -t ecdsa -b 256</code>. Any other types of keys are unsupported with the current version of this service.</p>
+  <p>This service uses <code>ecdsa-sha2-nistp256</code> keys that can be generated via <code>ssh-keygen -t ecdsa -b 256</code>. All other key type are unsupported.</p>
 </div>
 
 <script>

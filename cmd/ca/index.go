@@ -15,13 +15,15 @@ const IndexHTML = `
 
 <div class="ui borderless menu">
   <div class="item">
+  <a href="/">
     <h2 class="ui header">
-      <i class="key icon"></i>
+      <i class="key blue icon"></i>
       <div class="content">
         SSH Certificate Authority
         <div class="sub header">Providing Secure Authentication</div>
       </div>
     </h2>
+  </a>
   </div>
 
   <div class="item">

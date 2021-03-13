@@ -1,4 +1,14 @@
 ---
+- name: Firewall rule to allow ssh_ca service on TCP port 8080
+  win_firewall_rule:
+    name: "{{ssh_ca_service_name}}"
+    localport: 8080
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: yes
+
 - name: Check ssh_ca service state
   win_service:
     name: "{{ssh_ca_service_name}}"

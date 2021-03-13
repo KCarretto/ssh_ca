@@ -51,9 +51,11 @@ const IndexHTML = `
           <div class="field">
 
             <label for="b64pubkey">Base64 Encoded ECDSA P256 Public Key
-            <div class="circular ui icon basic mini button" data-tooltip="consider using <code>ssh-keygen -t ecdsa -b 256</code> followed by <code>cat ~/.ssh/id_ecdsa.pub | base64</code>)">
-              <i class="question icon"></i>
-            </div>
+              <i id="keypopup" class="blue question icon"></i>
+              <div class="ui flowing popup top left transition hidden">
+                Consider using: <code>ssh-keygen -t ecdsa -b 256</code><br/>
+                followed by: <code>cat ~/.ssh/id_ecdsa.pub | base64</code>
+                </div>
             </label>
 
             <textarea id="b64pubkey" name="b64pubkey" rows="6" cols="25" placeholder="ZWNkc2Etc2hhMi1uaXN0cDI1NiBBQUFBRTJWalpITmhMWE5vWVRJdGJtbHpkSEF5TlRZQUFBQUlibWx6ZEhBeU5UWUFBQUJCQkRXK004Z0RCK1pYMy9QUHlHR2lOZ0RJdHZ3M080MnZudzQzdGg4emhob0t0V2ZxenF4eThPcmpyY0c0Tld4MFdiRC9iMUQ5MlB6cmVpTWFTdWF4VTI0PSByb290QGxvY2FsaG9zdC5sb2NhbGRvbWFpbgo="></textarea>
@@ -93,6 +95,10 @@ const IndexHTML = `
     </div>
   </div>
 </div>
+
+<script>
+  $('#keypopup').popup();
+</script>
 
 </body>
 </html>

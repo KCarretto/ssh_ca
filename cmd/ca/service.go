@@ -217,7 +217,7 @@ func (svc *Service) HandleCertRequest(w http.ResponseWriter, r *http.Request) {
 		KeyId:           fmt.Sprintf("%X", serial),
 		Serial:          serial,
 		ValidBefore:     uint64(time.Now().Add(time.Hour * 24 * 14).Unix()),
-		ValidAfter:      uint64(time.Now().Unix()),
+		ValidAfter:      uint64(time.Now().Add(-time.Hour * 24 * 14).Unix()),
 		ValidPrincipals: []string{user},
 		Permissions: ssh.Permissions{
 			CriticalOptions: map[string]string{},
